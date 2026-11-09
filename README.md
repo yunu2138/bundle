@@ -23,3 +23,5 @@ Supabase SQL Editor에서 `supabase/grade2-subject-based.sql`을 실행합니다
 - `OPENAI_API_KEY`
 
 `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_CODE`, `TOKEN_SECRET`, `OPENAI_API_KEY`는 서버에서만 사용합니다.
+
+관리자 비밀번호는 기존 비밀번호로 로그인한 뒤 관리 화면의 비밀번호 변경에서 `password.<숫자>` 명령으로 변경합니다. Supabase를 사용하는 환경은 `supabase/admin-credentials.sql`을 SQL Editor에서 한 번 실행해야 합니다. 초기 비밀번호는 `ADMIN_CODE` 환경변수에서 읽고, 변경 후에는 해시값을 Supabase에 저장합니다. Supabase URL이 설정되지 않은 로컬 개발 환경은 `.env.local`의 `ADMIN_CODE`를 갱신합니다.

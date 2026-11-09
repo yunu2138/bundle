@@ -49,6 +49,10 @@ function ManagementPage({ token, identity, expiresAt, onEnd }) {
   const [editorOpen, setEditorOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState("");
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [passwordCommand, setPasswordCommand] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
   const isAdmin = identity.role === "admin";
   const isGrade2Public = identity.role === "grade2_public";
 
@@ -163,6 +167,29 @@ function ManagementPage({ token, identity, expiresAt, onEnd }) {
     }
   };
 
+  const changePassword = async (event) => {
+    event.preventDefault();
+    setChangingPassword(true);
+    setPasswordError("");
+    try {
+      await request("/api/admin-password", token, {
+        method: "POST",
+        body: JSON.stringify({ command: passwordCommand }),
+      });
+      setPasswordDialogOpen(false);
+      setPasswordCommand("");
+      setToast("관리자 비밀번호를 변경했어요.");
+    } catch (error) {
+      if (error.status === 401) {
+        endExpiredSession();
+        return;
+      }
+      setPasswordError(error.message);
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   const startCreate = () => {
     setEditorSchedule(null);
     setEditorOpen(true);
@@ -197,13 +224,27 @@ function ManagementPage({ token, identity, expiresAt, onEnd }) {
           </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{title}</h1>
         </div>
-        <button
-          className="touch-target rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-          onClick={() => onEnd()}
-          type="button"
-        >
-          관리 모드 끝내기
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {isAdmin && (
+            <button
+              className="touch-target rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              onClick={() => {
+                setPasswordError("");
+                setPasswordDialogOpen(true);
+              }}
+              type="button"
+            >
+              비밀번호 변경
+            </button>
+          )}
+          <button
+            className="touch-target rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            onClick={() => onEnd()}
+            type="button"
+          >
+            관리 모드 끝내기
+          </button>
+        </div>
       </header>
 
       <>
@@ -338,6 +379,64 @@ function ManagementPage({ token, identity, expiresAt, onEnd }) {
           role="status"
         >
           {toast}
+        </div>
+      )}
+
+      {passwordDialogOpen && (
+        <div className="fixed inset-0 z-30 flex items-end justify-center bg-slate-950/50 p-0 sm:items-center sm:p-5">
+          <section
+            aria-labelledby="admin-password-title"
+            aria-modal="true"
+            className="mobile-dialog w-full rounded-t-3xl bg-white p-6 shadow-xl dark:bg-slate-900 sm:max-w-md sm:rounded-3xl"
+            role="dialog"
+          >
+            <h2
+              className="text-xl font-bold text-slate-900 dark:text-white"
+              id="admin-password-title"
+            >
+              관리자 비밀번호 변경
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              새 비밀번호를 설정하려면 <code>password.</code> 뒤에 숫자를 입력하세요.
+            </p>
+            <form className="mt-5" onSubmit={changePassword}>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                변경 명령
+                <input
+                  autoComplete="new-password"
+                  className="mt-1 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-indigo-950"
+                  disabled={changingPassword}
+                  onChange={(event) => setPasswordCommand(event.target.value)}
+                  placeholder="password.1234"
+                  required
+                  type="password"
+                  value={passwordCommand}
+                />
+              </label>
+              {passwordError && (
+                <p aria-live="polite" className="mt-3 text-sm font-medium text-rose-700 dark:text-rose-300">
+                  {passwordError}
+                </p>
+              )}
+              <div className="mt-5 flex gap-2">
+                <button
+                  className="touch-target flex-1 rounded-xl border border-slate-200 font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-200"
+                  disabled={changingPassword}
+                  onClick={() => setPasswordDialogOpen(false)}
+                  type="button"
+                >
+                  취소
+                </button>
+                <button
+                  className="touch-target flex-1 rounded-xl bg-indigo-600 font-bold text-white disabled:opacity-60"
+                  disabled={changingPassword || !passwordCommand.trim()}
+                  type="submit"
+                >
+                  {changingPassword ? "변경 중…" : "비밀번호 변경"}
+                </button>
+              </div>
+            </form>
+          </section>
         </div>
       )}
 

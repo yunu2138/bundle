@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     }
 
     const normalizedCode = code.trim();
-    if (isAdminCode(normalizedCode)) {
+    if (await isAdminCode(normalizedCode)) {
       const token = issueToken({ role: "admin" });
       return sendJson(res, 200, { role: "admin", token });
     }

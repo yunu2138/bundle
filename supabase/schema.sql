@@ -35,6 +35,12 @@ create table if not exists public.class_codes (
   primary key (grade, class_no)
 );
 
+create table if not exists public.admin_credentials (
+  id boolean primary key default true check (id),
+  code_hash text not null,
+  updated_at timestamptz not null default now()
+);
+
 alter table public.schedules
   drop constraint if exists schedules_class_no_check;
 alter table public.schedules
@@ -97,6 +103,7 @@ for each row execute function public.set_updated_at();
 
 alter table public.schedules enable row level security;
 alter table public.class_codes enable row level security;
+alter table public.admin_credentials enable row level security;
 
 drop policy if exists "Schedules are readable by everyone" on public.schedules;
 create policy "Schedules are readable by everyone"
@@ -108,4 +115,6 @@ create policy "Schedules are readable by everyone"
 revoke all on table public.schedules from anon, authenticated;
 grant select on table public.schedules to anon, authenticated;
 
+revoke all on table public.admin_credentials from anon, authenticated;
+grant all on table public.admin_credentials to service_role;
 revoke all on table public.class_codes from anon, authenticated;
