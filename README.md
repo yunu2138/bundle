@@ -6,7 +6,7 @@
 2. `.env.example`을 복사해 `.env.local`로 저장하고 서버 환경변수를 입력합니다.
 3. `npm run dev`로 개발 서버를 실행합니다.
 
-`OPENAI_API_KEY`는 OpenAI Moderation API를 위한 서버 전용 키입니다. 브라우저에 공개되는 `VITE_` 접두사를 붙이지 마세요. 일정 저장·수정은 AI 검열이 성공해야 진행됩니다. 검열은 부적절한 콘텐츠를 찾기 위한 것이며, 일정의 사실 여부나 과목 적합성을 보증하지 않습니다. 이메일·전화번호 등 명시적인 개인정보 패턴은 AI에 보내기 전에 차단합니다.
+일정 저장 시 AI 검열은 실행하지 않습니다. 필수 입력값과 일정 형식은 서버에서 계속 검증합니다.
 
 ## 기존 Supabase에 2학년 반 제거 적용
 
@@ -16,11 +16,10 @@ Supabase SQL Editor에서 `supabase/grade2-subject-based.sql`을 실행합니다
 
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `OPENAI_API_KEY`
 - `ADMIN_CODE` (초기 비밀번호 또는 Supabase 자격 증명 행이 없을 때의 대체값)
 - `TOKEN_SECRET` (32자 이상의 무작위 비밀값)
 
-`SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`, `ADMIN_CODE`, `TOKEN_SECRET`은 서버에서만 사용합니다. 관리자 비밀번호를 맞게 입력한 사용자만 관리 화면과 일정 쓰기 API를 사용할 수 있습니다. 발급된 관리자 세션은 2시간 뒤 만료되고, 비밀번호를 바꾸면 기존 세션도 만료됩니다.
+`SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_CODE`, `TOKEN_SECRET`은 서버에서만 사용합니다. 관리자 비밀번호를 맞게 입력한 사용자만 관리 화면과 일정 쓰기 API를 사용할 수 있습니다. 발급된 관리자 세션은 2시간 뒤 만료되고, 비밀번호를 바꾸면 기존 세션도 만료됩니다.
 
 관리 화면의 비밀번호 변경에 `password.<숫자>`를 입력하면 뒤 숫자로 비밀번호를 바꿉니다. Supabase를 사용하는 환경은 `supabase/admin-credentials.sql`을 SQL Editor에서 한 번 실행해야 합니다. 로컬에서는 `.env.local`에 비밀번호 값이 저장됩니다.
 

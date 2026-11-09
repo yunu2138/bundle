@@ -2,7 +2,6 @@ import { handleApiError, HttpError, readJsonBody, rejectMethod, sendJson } from 
 import {
   validateSchedulePayload,
 } from "../lib/schedule-validation.js";
-import { moderateSchedule } from "../lib/moderation.js";
 import { getSupabase } from "../lib/supabase.js";
 import { requireToken } from "../lib/auth.js";
 import { CLASSES_PER_GRADE, GRADES } from "../src/config.js";
@@ -56,7 +55,6 @@ export default async function handler(req, res) {
       await requireToken(req);
       const body = readJsonBody(req);
       const schedule = validateSchedulePayload(body);
-      await moderateSchedule(schedule);
       schedule.updated_by_label = "관리자";
       const { data, error } = await getSupabase()
         .from("schedules")

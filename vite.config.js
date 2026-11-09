@@ -10,7 +10,6 @@ import verifyCodeHandler from "./api/verify-code.js";
 const serverEnvKeys = [
   "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
-  "OPENAI_API_KEY",
   "ADMIN_CODE",
   "TOKEN_SECRET",
 ];

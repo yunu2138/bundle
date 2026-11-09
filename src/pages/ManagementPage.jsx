@@ -247,7 +247,7 @@ function ManagementPage({ identity, onEnd, onTokenChange }) {
             </div>
           ) : (
             <p className="mt-5 rounded-xl bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
-              관리자 비밀번호를 입력하면 누구나 일정을 추가·수정·삭제할 수 있어요. 일정 저장에는 AI 검열이 적용됩니다.
+              관리자 비밀번호를 입력하면 누구나 일정을 추가·수정·삭제할 수 있어요.
             </p>
           )}
 

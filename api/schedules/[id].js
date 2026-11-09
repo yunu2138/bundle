@@ -2,7 +2,6 @@ import { handleApiError, HttpError, readJsonBody, rejectMethod, sendJson } from 
 import {
   validateSchedulePayload,
 } from "../../lib/schedule-validation.js";
-import { moderateSchedule } from "../../lib/moderation.js";
 import { getSupabase } from "../../lib/supabase.js";
 import { requireToken } from "../../lib/auth.js";
 
@@ -44,9 +43,7 @@ export default async function handler(req, res) {
       if (error) throw new Error(error.message);
       return sendJson(res, 200, { success: true });
     }
-
     const schedule = validateSchedulePayload(readJsonBody(req));
-    await moderateSchedule(schedule);
     schedule.updated_by_label = "관리자";
     const { data, error } = await supabase
       .from("schedules")
