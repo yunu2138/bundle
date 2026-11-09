@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import ScheduleEditorModal from "../components/ScheduleEditorModal.jsx";
+import { readJsonResponse } from "../lib/api-response.js";
 import {
   CLASSES_PER_GRADE,
   GRADES,
@@ -25,7 +26,7 @@ async function request(path, token, options = {}) {
     throw new Error("서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.");
   }
 
-  const body = await response.json().catch(() => null);
+  const body = await readJsonResponse(response);
   if (!response.ok) {
     const error = new Error(body?.error || "요청을 처리하지 못했어요.");
     error.status = response.status;

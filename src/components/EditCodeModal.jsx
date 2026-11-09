@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { readJsonResponse } from "../lib/api-response.js";
 
 const ATTEMPT_STORAGE_KEY = "schedule-edit-code-attempts";
 const MAX_ATTEMPTS = 5;
@@ -54,7 +55,7 @@ function EditCodeModal({ onClose, onVerified, initialMessage = "" }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-      const body = await response.json();
+      const body = await readJsonResponse(response);
 
       if (!response.ok) {
         if (response.status === 401) {

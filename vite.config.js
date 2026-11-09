@@ -138,7 +138,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    base: "/bundle/",
+    base: process.env.VERCEL ? "/" : "/bundle/",
     plugins: [react(), localApiPlugin()],
     build: {
       outDir: "docs",

@@ -4,6 +4,7 @@ import "dayjs/locale/ko";
 import EditCodeModal from "../components/EditCodeModal.jsx";
 import ScheduleDetailModal from "../components/ScheduleDetailModal.jsx";
 import ManagementPage from "./ManagementPage.jsx";
+import { readJsonResponse } from "../lib/api-response.js";
 import {
   CLASSES_PER_GRADE,
   GRADES,
@@ -131,7 +132,7 @@ function StudentPage() {
     setLoadError(false);
     fetch(`/api/schedules?${query}`, { signal: controller.signal })
       .then(async (response) => {
-        const data = await response.json();
+        const data = await readJsonResponse(response);
         if (!response.ok) {
           throw new Error(data.error || "일정을 불러오지 못했어요.");
         }
