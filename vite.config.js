@@ -73,9 +73,9 @@ function localApiPlugin() {
             size += chunk.length;
 
             if (size > bodyLimit) {
-              return res
-                .status(413)
-                .json({ error: "요청 내용이 너무 커요." });
+              return res.status(413).json({
+                error: "요청 내용이 너무 커요.",
+              });
             }
 
             chunks.push(chunk);
@@ -87,9 +87,9 @@ function localApiPlugin() {
                 Buffer.concat(chunks).toString("utf8")
               );
             } catch {
-              return res
-                .status(400)
-                .json({ error: "요청 내용을 확인해 주세요." });
+              return res.status(400).json({
+                error: "요청 내용을 확인해 주세요.",
+              });
             }
           }
         }
@@ -138,5 +138,9 @@ export default defineConfig(({ mode }) => {
   return {
     base: "/bundle/",
     plugins: [react(), localApiPlugin()],
+    build: {
+      outDir: "docs",
+      emptyOutDir: true,
+    },
   };
 });
