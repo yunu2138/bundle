@@ -4,6 +4,7 @@ import {
 } from "../../lib/schedule-validation.js";
 import { moderateSchedule } from "../../lib/moderation.js";
 import { getSupabase } from "../../lib/supabase.js";
+import { requireToken } from "../../lib/auth.js";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -33,6 +34,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    await requireToken(req);
     const id = readId(req.query.id);
     const supabase = getSupabase();
     await findSchedule(supabase, id);

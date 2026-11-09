@@ -4,6 +4,7 @@ import {
 } from "../lib/schedule-validation.js";
 import { moderateSchedule } from "../lib/moderation.js";
 import { getSupabase } from "../lib/supabase.js";
+import { requireToken } from "../lib/auth.js";
 import { CLASSES_PER_GRADE, GRADES } from "../src/config.js";
 
 function readQueryInteger(value) {
@@ -52,6 +53,7 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     try {
+      await requireToken(req);
       const body = readJsonBody(req);
       const schedule = validateSchedulePayload(body);
       await moderateSchedule(schedule);

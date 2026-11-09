@@ -9,13 +9,14 @@ import {
   SCHEDULE_TYPES,
 } from "../config.js";
 
-async function request(path, options = {}) {
+async function request(path, options = {}, token) {
   let response;
   try {
     response = await fetch(path, {
       ...options,
       headers: {
         ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       },
     });
@@ -32,7 +33,7 @@ async function request(path, options = {}) {
   return body;
 }
 
-function ManagementPage({ identity, onEnd }) {
+function ManagementPage({ identity, onEnd, onTokenChange }) {
   const [grade, setGrade] = useState(1);
   const [classFilter, setClassFilter] = useState("all");
   const [schedules, setSchedules] = useState([]);
@@ -61,7 +62,7 @@ function ManagementPage({ identity, onEnd }) {
     });
 
     try {
-      const data = await request(`/api/schedules?${query}`);
+      const data = await request(`/api/schedules?${query}`, {}, identity.token);
       setSchedules(data);
     } catch (error) {
       if (error.status === 401) {
@@ -72,7 +73,7 @@ function ManagementPage({ identity, onEnd }) {
     } finally {
       setIsLoading(false);
     }
-  }, [endExpiredSession, grade]);
+  }, [endExpiredSession, grade, identity.token]);
 
   useEffect(() => {
     loadSchedules();
@@ -114,7 +115,7 @@ function ManagementPage({ identity, onEnd }) {
       await request(path, {
         method: isEditing ? "PUT" : "POST",
         body: JSON.stringify(values),
-      });
+      }, identity.token);
       setEditorOpen(false);
       setEditorSchedule(null);
       setToast(isEditing ? "일정을 수정했어요." : "일정을 추가했어요.");
@@ -132,7 +133,7 @@ function ManagementPage({ identity, onEnd }) {
     try {
       await request(`/api/schedules/${encodeURIComponent(schedule.id)}`, {
         method: "DELETE",
-      });
+      }, identity.token);
       setToast("일정을 삭제했어요.");
       await loadSchedules();
     } catch (error) {
@@ -149,10 +150,14 @@ function ManagementPage({ identity, onEnd }) {
     setChangingPassword(true);
     setPasswordError("");
     try {
-      await request("/api/admin-password", {
+      const result = await request("/api/admin-password", {
         method: "POST",
         body: JSON.stringify({ command: passwordCommand }),
-      });
+      }, identity.token);
+      if (typeof result.token !== "string") {
+        throw new Error("새 인증 정보를 확인하지 못했어요. 다시 로그인해 주세요.");
+      }
+      onTokenChange(result.token);
       setPasswordDialogOpen(false);
       setPasswordCommand("");
       setToast("관리자 비밀번호를 변경했어요.");
@@ -242,7 +247,7 @@ function ManagementPage({ identity, onEnd }) {
             </div>
           ) : (
             <p className="mt-5 rounded-xl bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
-              로그인 없이 누구나 일정을 추가·수정·삭제하고 관리자 비밀번호를 변경할 수 있어요. 일정 저장에는 AI 검열이 적용됩니다.
+              관리자 비밀번호를 입력하면 누구나 일정을 추가·수정·삭제할 수 있어요. 일정 저장에는 AI 검열이 적용됩니다.
             </p>
           )}
 

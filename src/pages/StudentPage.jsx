@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
+import EditCodeModal from "../components/EditCodeModal.jsx";
 import ScheduleDetailModal from "../components/ScheduleDetailModal.jsx";
 import ManagementPage from "./ManagementPage.jsx";
 import { readJsonResponse } from "../lib/api-response.js";
@@ -64,15 +65,25 @@ function StudentPage() {
   const [showPast, setShowPast] = useState(false);
   const [activeSchedule, setActiveSchedule] = useState(null);
   const [managementSession, setManagementSession] = useState(null);
+  const [codeModalOpen, setCodeModalOpen] = useState(false);
 
-  const endManagement = () => {
+  const endManagement = useCallback(() => {
     setManagementSession(null);
-  };
+  }, []);
 
   const startManagement = () => {
-    setManagementSession({
-      identity: { role: "admin" },
-    });
+    setCodeModalOpen(true);
+  };
+
+  const startVerifiedManagement = (identity) => {
+    setCodeModalOpen(false);
+    setManagementSession({ identity });
+  };
+
+  const updateManagementToken = (token) => {
+    setManagementSession((current) =>
+      current ? { ...current, identity: { ...current.identity, token } } : current,
+    );
   };
 
   useEffect(() => {
@@ -198,6 +209,7 @@ function StudentPage() {
     return (
       <ManagementPage
         identity={managementSession.identity}
+        onTokenChange={updateManagementToken}
         onEnd={endManagement}
       />
     );
@@ -442,6 +454,12 @@ function StudentPage() {
             changePrepared(activeSchedule.id, event.currentTarget.checked)
           }
           onClose={() => setActiveSchedule(null)}
+        />
+      )}
+      {codeModalOpen && (
+        <EditCodeModal
+          onClose={() => setCodeModalOpen(false)}
+          onVerified={startVerifiedManagement}
         />
       )}
     </main>

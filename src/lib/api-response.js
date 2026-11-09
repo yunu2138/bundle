@@ -4,7 +4,7 @@ export async function readJsonResponse(response) {
     const hostname = window.location.hostname;
     if (hostname === "github.io" || hostname.endsWith(".github.io")) {
       throw new Error(
-        "GitHub Pages에서는 일정 API를 실행할 수 없어요. Vercel에 배포된 사이트를 이용해 주세요.",
+        "현재 GitHub Pages 주소에서는 일정 API를 사용할 수 없어요. Vercel에 배포된 사이트 주소에서 이용해 주세요.",
       );
     }
     throw new Error(

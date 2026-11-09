@@ -5,12 +5,13 @@ import {
   rejectMethod,
   sendJson,
 } from "../lib/api.js";
-import { changeAdminCode } from "../lib/auth.js";
+import { changeAdminCode, issueToken, requireToken } from "../lib/auth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return rejectMethod(res, ["POST"]);
 
   try {
+    await requireToken(req);
     const { command } = readJsonBody(req);
     const match =
       typeof command === "string" && command.match(/^password\.(\d{1,64})$/);
@@ -19,7 +20,10 @@ export default async function handler(req, res) {
     }
 
     await changeAdminCode(match[1]);
-    return sendJson(res, 200, { success: true });
+    return sendJson(res, 200, {
+      success: true,
+      token: issueToken(match[1]),
+    });
   } catch (error) {
     return handleApiError(res, error, "POST /api/admin-password");
   }
