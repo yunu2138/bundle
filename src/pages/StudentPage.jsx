@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import EditCodeModal from "../components/EditCodeModal.jsx";
 import ScheduleDetailModal from "../components/ScheduleDetailModal.jsx";
 import ManagementPage from "./ManagementPage.jsx";
 import { readJsonResponse } from "../lib/api-response.js";
@@ -38,35 +37,6 @@ const TYPE_BAR_CLASS = {
   purple: "bg-purple-500",
 };
 
-function decodeTokenClaims(token) {
-  const encodedClaims = token?.split(".")[1];
-  if (!encodedClaims) return null;
-
-  const unpadded = encodedClaims.replace(/-/g, "+").replace(/_/g, "/");
-  const base64 = unpadded.padEnd(Math.ceil(unpadded.length / 4) * 4, "=");
-  return JSON.parse(window.atob(base64));
-}
-
-function readManagementSession() {
-  try {
-    const token = sessionStorage.getItem("schedule-management-token");
-    if (!token) return null;
-    const claims = decodeTokenClaims(token);
-    if (!Number.isFinite(claims.exp) || claims.exp * 1000 <= Date.now()) {
-      sessionStorage.removeItem("schedule-management-token");
-      return null;
-    }
-
-    if (claims.role === "admin") {
-      return { token, identity: claims, expiresAt: claims.exp * 1000 };
-    }
-    sessionStorage.removeItem("schedule-management-token");
-  } catch {
-    sessionStorage.removeItem("schedule-management-token");
-  }
-  return null;
-}
-
 function StudentPage() {
   const [selection, setSelection] = useState(() => {
     const stored = readStoredValue("schedule-selection", null);
@@ -93,28 +63,16 @@ function StudentPage() {
   const [month, setMonth] = useState(dayjs().startOf("month"));
   const [showPast, setShowPast] = useState(false);
   const [activeSchedule, setActiveSchedule] = useState(null);
-  const [managementSession, setManagementSession] = useState(readManagementSession);
-  const [showCodePrompt, setShowCodePrompt] = useState(false);
-  const [codePromptMessage, setCodePromptMessage] = useState("");
+  const [managementSession, setManagementSession] = useState(null);
 
-  const endManagement = (message = "") => {
-    sessionStorage.removeItem("schedule-management-token");
+  const endManagement = () => {
     setManagementSession(null);
-    setShowCodePrompt(Boolean(message));
-    setCodePromptMessage(message);
   };
 
-  const startManagement = (result) => {
-    const identity = { role: "admin" };
-    const claims = decodeTokenClaims(result.token);
-    sessionStorage.setItem("schedule-management-token", result.token);
+  const startManagement = () => {
     setManagementSession({
-      token: result.token,
-      identity,
-      expiresAt: claims.exp * 1000,
+      identity: { role: "admin" },
     });
-    setShowCodePrompt(false);
-    setCodePromptMessage("");
   };
 
   useEffect(() => {
@@ -241,8 +199,6 @@ function StudentPage() {
       <ManagementPage
         identity={managementSession.identity}
         onEnd={endManagement}
-        expiresAt={managementSession.expiresAt}
-        token={managementSession.token}
       />
     );
   }
@@ -464,33 +420,12 @@ function StudentPage() {
 
       <button
         className="touch-target fixed bottom-4 right-4 rounded-full border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-500 shadow-lg dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-        onClick={() => {
-          if (selection?.grade === 2) {
-            setManagementSession({
-              token: null,
-              identity: { role: "grade2_public", grade: 2, class_no: null },
-              expiresAt: null,
-            });
-            return;
-          }
-          setCodePromptMessage("");
-          setShowCodePrompt(true);
-        }}
+        onClick={startManagement}
         type="button"
       >
-        {selection?.grade === 2 ? "2학년 과목 일정 편집" : "일정 관리"}
+        일정 관리
       </button>
 
-      {showCodePrompt && (
-        <EditCodeModal
-          initialMessage={codePromptMessage}
-          onClose={() => {
-            setShowCodePrompt(false);
-            setCodePromptMessage("");
-          }}
-          onVerified={startManagement}
-        />
-      )}
       {choosing && (
         <ClassPicker
           grade={gradeDraft}

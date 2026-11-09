@@ -286,11 +286,7 @@ function ScheduleEditorModal({
               disabled={saving}
               type="submit"
             >
-              {saving
-                ? identity.role === "grade2_public"
-                  ? "AI 검열 중…"
-                  : "저장 중…"
-                : "저장"}
+              {saving ? "저장 중…" : "저장"}
             </button>
           </div>
         </form>

@@ -1,7 +1,5 @@
 import { handleApiError, HttpError, readJsonBody, rejectMethod, sendJson } from "../../lib/api.js";
-import { getScheduleWriteIdentity } from "../../lib/auth.js";
 import {
-  validatePublicGrade2Schedule,
   validateSchedulePayload,
 } from "../../lib/schedule-validation.js";
 import { moderateSchedule } from "../../lib/moderation.js";
@@ -37,11 +35,7 @@ export default async function handler(req, res) {
   try {
     const id = readId(req.query.id);
     const supabase = getSupabase();
-    const existing = await findSchedule(supabase, id);
-    const identity = getScheduleWriteIdentity(req);
-    if (identity.role === "grade2_public") {
-      validatePublicGrade2Schedule(existing);
-    }
+    await findSchedule(supabase, id);
 
     if (req.method === "DELETE") {
       const { error } = await supabase.from("schedules").delete().eq("id", id);
@@ -50,12 +44,8 @@ export default async function handler(req, res) {
     }
 
     const schedule = validateSchedulePayload(readJsonBody(req));
-    if (identity.role === "grade2_public") {
-      validatePublicGrade2Schedule(schedule);
-    }
     await moderateSchedule(schedule);
-    schedule.updated_by_label =
-      identity.role === "grade2_public" ? "2학년 공동" : "관리자";
+    schedule.updated_by_label = "관리자";
     const { data, error } = await supabase
       .from("schedules")
       .update(schedule)

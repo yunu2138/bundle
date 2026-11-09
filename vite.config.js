@@ -4,21 +4,17 @@ import react from "@vitejs/plugin-react";
 
 import schedulesHandler from "./api/schedules.js";
 import scheduleByIdHandler from "./api/schedules/[id].js";
-import verifyCodeHandler from "./api/verify-code.js";
 import adminPasswordHandler from "./api/admin-password.js";
 
 const serverEnvKeys = [
   "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
-  "ADMIN_CODE",
-  "TOKEN_SECRET",
   "OPENAI_API_KEY",
 ];
 
 function localApiPlugin() {
   const handlers = new Map([
     ["/api/schedules", schedulesHandler],
-    ["/api/verify-code", verifyCodeHandler],
     ["/api/admin-password", adminPasswordHandler],
   ]);
 

@@ -12,20 +12,16 @@
 
 Supabase SQL Editor에서 `supabase/grade2-subject-based.sql`을 실행합니다. 기존 2학년 반별 일정은 반 정보를 없애고 2학년 과목 일정으로 전환합니다. 과목명 제약도 새 학년별 과목을 허용하도록 갱신하며, 이후 2학년 반 번호는 DB 제약에서도 허용되지 않습니다. 시연 데이터도 최신 과목명으로 바꾸려면 그 뒤 `supabase/seed.sql`을 다시 실행합니다.
 
-## Vercel 환경변수
-
-다음 값을 Vercel 프로젝트의 환경변수로 등록하고 재배포합니다.
+## 서버 환경변수
 
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `ADMIN_CODE`
-- `TOKEN_SECRET`
 - `OPENAI_API_KEY`
 
-`SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_CODE`, `TOKEN_SECRET`, `OPENAI_API_KEY`는 서버에서만 사용합니다.
+`SUPABASE_SERVICE_ROLE_KEY`와 `OPENAI_API_KEY`는 서버에서만 사용합니다.
 
-관리자 비밀번호는 기존 비밀번호로 로그인한 뒤 관리 화면의 비밀번호 변경에서 `password.<숫자>` 명령으로 변경합니다. Supabase를 사용하는 환경은 `supabase/admin-credentials.sql`을 SQL Editor에서 한 번 실행해야 합니다. 초기 비밀번호는 `ADMIN_CODE` 환경변수에서 읽고, 변경 후에는 해시값을 Supabase에 저장합니다. Supabase URL이 설정되지 않은 로컬 개발 환경은 `.env.local`의 `ADMIN_CODE`를 갱신합니다.
+로그인 없이 누구나 모든 일정의 추가·수정·삭제와 관리자 비밀번호 변경을 할 수 있습니다. 관리 화면의 비밀번호 변경에 `password.<숫자>`를 입력하면 뒤 숫자로 저장된 비밀번호 값을 바꿉니다. 비밀번호 값은 접근을 제한하지 않습니다. Supabase를 사용하는 환경은 `supabase/admin-credentials.sql`을 SQL Editor에서 한 번 실행해야 합니다. 로컬에서는 `.env.local`에 비밀번호 값이 저장됩니다.
 
 ## 배포
 
-GitHub Pages는 정적 파일만 제공하므로 관리자 인증과 일정 API를 실행할 수 없습니다. API가 필요한 사이트는 GitHub 저장소를 Vercel 프로젝트로 가져와 배포하세요. 저장소의 `vercel.json`이 빌드 설정을 지정하고 Vercel은 `api/` 서버 함수를 자동으로 연결합니다. Vercel 프로젝트에 위 환경변수를 등록하고 `supabase/admin-credentials.sql`을 실행한 뒤, Vercel 배포 URL에서 관리자 인증을 이용하세요. GitHub Pages 주소에서는 API가 동작하지 않습니다.
+GitHub Pages는 정적 파일만 제공하므로 일정 API를 실행할 수 없습니다. API가 필요한 사이트는 GitHub 저장소를 Vercel 프로젝트로 가져와 배포하세요. 저장소의 `vercel.json`이 빌드 설정을 지정하고 Vercel은 `api/` 서버 함수를 자동으로 연결합니다. Vercel 프로젝트에 위 환경변수를 등록하고 `supabase/admin-credentials.sql`을 실행한 뒤, Vercel 배포 URL에서 일정 관리를 이용하세요. GitHub Pages 주소에서는 일정 관리와 비밀번호 변경 API가 동작하지 않습니다.

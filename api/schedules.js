@@ -1,7 +1,5 @@
 import { handleApiError, HttpError, readJsonBody, rejectMethod, sendJson } from "../lib/api.js";
-import { getScheduleWriteIdentity, requireToken } from "../lib/auth.js";
 import {
-  validatePublicGrade2Schedule,
   validateSchedulePayload,
 } from "../lib/schedule-validation.js";
 import { moderateSchedule } from "../lib/moderation.js";
@@ -28,11 +26,8 @@ export default async function handler(req, res) {
         if (!allClasses) {
           throw new HttpError(400, "2학년은 반 없이 과목별 일정을 확인해요.");
         }
-        if (req.headers.authorization) requireToken(req);
       } else {
-        if (allClasses) {
-          requireToken(req);
-        } else {
+        if (!allClasses) {
           classNo = readQueryInteger(requestedClass);
           if (!classNo || classNo > CLASSES_PER_GRADE) {
             throw new HttpError(400, "학년과 반을 확인해 주세요.");
@@ -59,13 +54,8 @@ export default async function handler(req, res) {
     try {
       const body = readJsonBody(req);
       const schedule = validateSchedulePayload(body);
-      const identity = getScheduleWriteIdentity(req);
-      if (identity.role === "grade2_public") {
-        validatePublicGrade2Schedule(schedule);
-      }
       await moderateSchedule(schedule);
-      schedule.updated_by_label =
-        identity.role === "grade2_public" ? "2학년 공동" : "관리자";
+      schedule.updated_by_label = "관리자";
       const { data, error } = await getSupabase()
         .from("schedules")
         .insert(schedule)
